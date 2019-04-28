@@ -10,9 +10,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-       child: Container(
-         child: Text("Homepage"),
-       ),
+       child: Center(child: Text("Home"),)
     );
   }
 }
