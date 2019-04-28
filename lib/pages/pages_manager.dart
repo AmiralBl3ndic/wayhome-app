@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import './home_page.dart';
+import './settings_page.dart';
+
 
 class PagesManager extends StatefulWidget {
   final String title;
@@ -12,11 +15,11 @@ class PagesManager extends StatefulWidget {
 class _PagesManagerState extends State<PagesManager> {
 
   int _currentPageIndex = 1;  // Home page by default
-  List<String> _pagesTitles = ["Settings", "wayHome", "Map"];
+  List<String> _pagesTitles = ["wayHome - Settings", "wayHome", "wayHome - Map"];
 
   List<Widget> _pages = [
-    Container(child: Text("Settings page")),
-    Container(child: Text("Home page")),
+    SettingsPage(),
+    HomePage(),
     Container(child: Text("Map page"))
   ];
 
