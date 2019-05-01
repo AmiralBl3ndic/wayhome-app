@@ -1,4 +1,7 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import './home_page.dart';
 import './settings_page.dart';
@@ -44,9 +47,9 @@ class _PagesManagerState extends State<PagesManager> {
   BottomNavigationBar _buildNavigationBar() {
     return BottomNavigationBar(
       items: <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.settings), title: Text(_pagesTitles[0])),  // Settings page
-        BottomNavigationBarItem(icon: Icon(Icons.home), title: Text(_pagesTitles[1])),  // Home page (default)
-        BottomNavigationBarItem(icon: Icon(Icons.map), title: Text(_pagesTitles[2]))  // Map page
+        BottomNavigationBarItem(icon: Platform.isAndroid ? Icon(Icons.settings) : Icon(CupertinoIcons.settings), title: Text(_pagesTitles[0])),  // Settings page
+        BottomNavigationBarItem(icon: Platform.isAndroid ? Icon(Icons.home) : Icon(CupertinoIcons.home), title: Text(_pagesTitles[1])),  // Home page (default)
+        BottomNavigationBarItem(icon: Platform.isAndroid ? Icon(Icons.map) : Icon(CupertinoIcons.location), title: Text(_pagesTitles[2]))  // Map page
       ],
 
       currentIndex: _currentPageIndex,
