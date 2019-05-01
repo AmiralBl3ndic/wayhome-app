@@ -2,9 +2,13 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:geolocator/geolocator.dart';
 
 import './home_page.dart';
 import './settings_page.dart';
+import './map_page.dart';
+
+import '../utils/address.dart';
 
 
 class PagesManager extends StatefulWidget {
@@ -17,14 +21,32 @@ class PagesManager extends StatefulWidget {
 
 class _PagesManagerState extends State<PagesManager> {
 
+  // Geolocalization properties
+  Position _position;
+  LocationOptions _locOptions = LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 10);
+  Geolocator _locator = Geolocator();
+
+  // Page navigation properties
   int _currentPageIndex = 1;  // Home page by default
   List<String> _pagesTitles = ["wayHome - Settings", "wayHome", "wayHome - Map"];
-
   List<Widget> _pages = [
     SettingsPage(),
     HomePage(),
-    Container(child: Text("Map page"))
+    MapPage(position: null,),
   ];
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    _position = null;  // Safety first
+
+    _locator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then(_updatePosition);
+
+    _locator.getPositionStream(_locOptions).listen(_updatePosition);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -60,5 +82,26 @@ class _PagesManagerState extends State<PagesManager> {
         });
       },
     );
+  }
+
+
+  /// Updates the last known position
+  void _updatePosition(Position p) {
+    // Actually updates the position
+    setState(() {
+      _position = p;
+      _pages[2] = MapPage(position: _position,);
+
+      debugPrint("Location updated");
+    });
+
+    // Debug print the address of the current position
+    _locator.placemarkFromCoordinates(p.latitude, p.longitude, localeIdentifier: "fr_FR").then((List<Placemark> placemarks) {
+      setState(() {
+        Placemark pm = placemarks[0];
+
+        debugPrint("Address: ${formatAddress(pm)}");
+      });
+    });
   }
 }
