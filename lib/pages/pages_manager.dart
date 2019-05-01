@@ -3,6 +3,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
+import 'package:location/location.dart';
+
 import './home_page.dart';
 import './settings_page.dart';
 import './map_page.dart';
@@ -18,20 +20,33 @@ class PagesManager extends StatefulWidget {
 
 class _PagesManagerState extends State<PagesManager> {
 
+  Location _locationProvider = Location();
+  LocationData _lastLocation;
+  String _targetAddress = "";
 
   // Page navigation properties
   int _currentPageIndex = 1;  // Home page by default
   List<String> _pagesTitles = ["wayHome - Settings", "wayHome", "wayHome - Map"];
-  List<Widget> _pages = [
-    SettingsPage(),
-    HomePage(),
-    MapPage(),
-  ];
+  List<Widget> _pages;
 
 
   @override
   void initState() {
     super.initState();
+
+    _pages = [
+      SettingsPage(onAddressChange: _onAddressChange,),
+      HomePage(),
+      MapPage(),
+    ];
+
+    _checkAndAskLocationPermissions();
+    _checkLocationServiceEnabled();
+
+    _locationProvider.onLocationChanged().listen((LocationData currentLocation) {
+      print("Latitude: ${currentLocation.latitude}");
+      print("Longitude: ${currentLocation.longitude}");
+    });
   }
 
 
@@ -51,6 +66,16 @@ class _PagesManagerState extends State<PagesManager> {
   }
 
 
+  /// Update the targetted address if it exists
+  void _onAddressChange(String newAddress) {
+    if (newAddress.isNotEmpty) {
+      // TODO: perform verification of validity for address
+      setState(() {
+        _targetAddress = newAddress;
+      });
+    }
+  }
+
 
   /// Builds the BottomNavigationBar widget (into a function for better code readability)
   BottomNavigationBar _buildNavigationBar() {
@@ -69,5 +94,25 @@ class _PagesManagerState extends State<PagesManager> {
         });
       },
     );
+  }
+
+
+  /// Check the location permissions and resquests them if not already granted
+  void _checkAndAskLocationPermissions() async {
+    bool hasPermission = await _locationProvider.hasPermission();
+
+    while (!hasPermission) {
+      hasPermission = await _locationProvider.requestPermission();
+    }
+  }
+
+
+  /// Check the location service and request the user to turn it on if needed
+  void _checkLocationServiceEnabled() async {
+    bool isEnabled = await _locationProvider.serviceEnabled();
+
+    while (Platform.isAndroid && !isEnabled) {
+      isEnabled = await _locationProvider.requestService();
+    }
   }
 }
