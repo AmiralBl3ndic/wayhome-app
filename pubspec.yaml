@@ -24,7 +24,7 @@ dependencies:
 
   geolocator: '^3.0.1'  # Will maybe have to be removed
 
-  sms: '^0.2.0'
+  flutter_sms: ^1.0.0
   
 
 dev_dependencies:
