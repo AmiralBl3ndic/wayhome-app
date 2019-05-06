@@ -1,5 +1,4 @@
 import 'package:geocoder/geocoder.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:flutter/services.dart';
 
 
