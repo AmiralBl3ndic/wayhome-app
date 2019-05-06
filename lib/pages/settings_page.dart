@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:geocoder/geocoder.dart';
+
 import '../components/location_input_form.dart';
 
 
@@ -7,7 +9,7 @@ import '../components/location_input_form.dart';
 class SettingsPage extends StatelessWidget {
 
   /// Custom callback function on address change
-  final Function onAddressChange;
+  final Function(Coordinates) onAddressChange;
 
   /// Default constructor for the SettingsPage widget
   const SettingsPage({Key key, @required this.onAddressChange}) : super(key: key);
@@ -26,11 +28,7 @@ class SettingsPage extends StatelessWidget {
             textAlign: TextAlign.left,
           ),
 
-          LocationInputForm(fieldContent: "8 rue Jean Macé, 75011 Paris", onSubmit: (String address) {
-            print("Address: $address");
-          }),
-
-
+          LocationInputForm(fieldContent: "8 rue Jean Macé, 75011 Paris", onSubmit: onAddressChange),
         ],
       )
     );

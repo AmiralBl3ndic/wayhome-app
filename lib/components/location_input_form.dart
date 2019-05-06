@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:geocoder/geocoder.dart';
+
+import '../utils/address.dart';
 
 class LocationInputForm extends StatefulWidget {
   /// Custom callback function that is called when the form is submitted
@@ -47,9 +50,7 @@ class _LocationInputFormState extends State<LocationInputForm> {
                 return "Please type in an address";
               }
             },
-            decoration: InputDecoration(
-              helperText: "Address",
-            ),
+            decoration: InputDecoration(helperText: "Address"),
           ),
 
           Padding(
@@ -59,11 +60,7 @@ class _LocationInputFormState extends State<LocationInputForm> {
             child: RaisedButton(
               child: Text("Submit"),
 
-              onPressed: () {
-                if (_formKey.currentState.validate()) {
-                  widget.onSubmit(_addressEditController.text);
-                }
-              },
+              onPressed: _onSubmit,
             ),
           )
         ],
@@ -71,6 +68,32 @@ class _LocationInputFormState extends State<LocationInputForm> {
     );
   }
 
+
+
+  /// Called uppon submission of the form to validate the address
+  void _onSubmit() {
+    // First, we check if the form is valid
+    if (_formKey.currentState.validate()) {
+      final String address = _addressEditController.text;  // Gather address from input field
+
+      convertAddressToCoordinates(address)
+        .then((Coordinates coords) {  // If address is OK
+          widget.onSubmit(coords);  // Callback function from the parent
+        })
+        .catchError((error) {  // If address is not OK
+          _showSnackBar(content: error.toString());
+        });
+    }
+  }
+
+
+  /// Displays a SnackBar with passed content for passed duration (defaut: 1.5s)
+  void _showSnackBar({@required String content, int displayTime = 1500}) {
+    Scaffold.of(context).showSnackBar(SnackBar(
+      content: Text(content),
+      duration: Duration(milliseconds: displayTime),
+    ));
+  }
 }
 
 

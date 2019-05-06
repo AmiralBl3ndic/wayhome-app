@@ -25,6 +25,8 @@ dependencies:
   location: ^2.3.5
 
   geocoder: ^0.1.2
+
+  geolocator: ^4.0.0
   
 
 dev_dependencies:

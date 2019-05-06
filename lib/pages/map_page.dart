@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 
-
 class MapPage extends StatelessWidget {
 
-  const MapPage({Key key}) : super(key: key);
+  final double latitude;
+  final double longitude;
+
+  MapPage({Key key, @required this.latitude, @required this.longitude}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class MapPage extends StatelessWidget {
   Column _buildLocationIndicator() {
     return Column(
       children: <Widget>[
-        CircularProgressIndicator(),
+        (latitude == null || longitude == null) ? CircularProgressIndicator() : Text("Latitude: $latitude, Longitude: $longitude"),
       ],
     );
   }
