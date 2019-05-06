@@ -98,11 +98,13 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
   }
 
 
-
+  /// Update the position of the user
+  /// 
+  /// This method also checks if the new position is closer to the target than the position just before so that we know the user is going in the right direction
   void _updatePosition(Position position) {
     Geolocator().distanceBetween(position.latitude, position.longitude, _targetCoordinates.latitude, _targetCoordinates.longitude)
       .then((double newDistance) {
-        // We check if the user is 
+        // We check if the user is going in the right direction
         if (newDistance > _lastDistance) {  // TODO: determine an error margin (to avoid sending notifications straight away if user changes direction a bit)
           _wrongDirectionCounter++;  // Increment the wrong direction counter
 
