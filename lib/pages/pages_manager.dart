@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoder/geocoder.dart';
@@ -22,9 +23,9 @@ class PagesManager extends StatefulWidget {
 
 class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver {
 
-  static int MOTION_TRIGGER_TRESHOLD = 30;  // Minimum 30 meters motion to trigger event
+  static int _motionTriggerTreshold = 30;  // Minimum 30 meters motion to trigger event
 
-  final LocationOptions _locationOptions = LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: MOTION_TRIGGER_TRESHOLD);
+  final LocationOptions _locationOptions = LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: _motionTriggerTreshold);
   StreamSubscription<Position> _positionStream;
   Position _lastPosition;
   double _lastDistance;
@@ -32,7 +33,7 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
   double _initialDistance;
 
   int _wrongDirectionCounter = -1;
-  static int WRONG_DIRECTION_ALERT_MOD = 5;
+  static int _wrongDirectionAlertMod = 5;
 
   
   Coordinates _targetCoordinates;
@@ -46,6 +47,9 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
   @override
   void initState() {
     super.initState();
+
+    // Force device to use application in Portrait orientation only
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
     WidgetsBinding.instance.addObserver(this);
 
@@ -70,7 +74,7 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-
+    _positionStream.cancel();
     super.dispose();
   }
 
@@ -99,8 +103,8 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
         if (newDistance > _lastDistance) {
           _wrongDirectionCounter++;  // Increment the wrong direction counter
 
-          // If we reached a treshold of wrong direction (`WRONG_DIRECTION_ALERT_MOD` times in a row), then send an alert
-          if (_wrongDirectionCounter % WRONG_DIRECTION_ALERT_MOD == 0) {
+          // If we reached a treshold of wrong direction (`_wrongDirectionAlertMod` times in a row), then send an alert
+          if (_wrongDirectionCounter % _wrongDirectionAlertMod == 0) {
             // TODO: send push notification
             debugPrint("Wrong direction $_wrongDirectionCounter time${_wrongDirectionCounter <= 1 ? "" : "s"} in a row");
           }
