@@ -16,7 +16,7 @@ class MapPage extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Center(
-            child: _buildLocationIndicator(),
+            child: (longitude == null || latitude == null) ? _buildLocationIndicator() : Text("Latitude = $latitude  |  Longitude = $longitude"),
           ),
         ],
       ),
