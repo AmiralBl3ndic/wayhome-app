@@ -20,7 +20,7 @@ Future<double> distanceBetweenCoordinates(Coordinates start, Coordinates end) as
 /// Compute the distance between two points on the Earth's surface
 /// 
 /// This method is homemade and should hence not be used primarily
-double distanceBetweenCoordinates_homemade(Coordinates start, Coordinates end) {
+double distanceBetweenCoordinatesHomemade(Coordinates start, Coordinates end) {
   double haversine = _computeHaversine(start, end);
 
   double c = atan2(sqrt(haversine), sqrt(1-haversine));
