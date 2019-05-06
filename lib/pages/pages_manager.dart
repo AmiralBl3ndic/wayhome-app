@@ -33,7 +33,7 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
   double _initialDistance;
 
   int _wrongDirectionCounter = -1;
-  static int _wrongDirectionAlertMod = 5;
+  static int _wrongDirectionAlertMod = 6;
 
   
   Coordinates _targetCoordinates;
@@ -68,6 +68,9 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
 
     // Suscribe to geolocation updates
     _positionStream = Geolocator().getPositionStream(_locationOptions).listen(_updatePosition);
+
+
+    // TODO: add a setTimeout function to periodically check if user is still moving
   }
 
 
@@ -100,7 +103,7 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
     Geolocator().distanceBetween(position.latitude, position.longitude, _targetCoordinates.latitude, _targetCoordinates.longitude)
       .then((double newDistance) {
         // We check if the user is 
-        if (newDistance > _lastDistance) {
+        if (newDistance > _lastDistance) {  // TODO: determine an error margin (to avoid sending notifications straight away if user changes direction a bit)
           _wrongDirectionCounter++;  // Increment the wrong direction counter
 
           // If we reached a treshold of wrong direction (`_wrongDirectionAlertMod` times in a row), then send an alert
@@ -114,9 +117,11 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
       });
 
     // Update the last known position
-    setState(() {
+    setState(() {  // TODO: check if setState is really needed here (avoid rebuilding entire pages when not necessary)
       _lastPosition = position;
       debugPrint("Updated position: (lat=${position.latitude}, long=${position.longitude})");
+
+      _pages[2] = MapPage(latitude: position.latitude, longitude: position.longitude,);  // Maybe not necessary
     });
   }
 
