@@ -23,7 +23,7 @@ class PagesManager extends StatefulWidget {
 
 class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver {
 
-  static int _motionTriggerTreshold = 30;  // Minimum 30 meters motion to trigger event
+  static int _motionTriggerTreshold = 2;  // Minimum 30 meters motion to trigger event
 
   final LocationOptions _locationOptions = LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: _motionTriggerTreshold);
   StreamSubscription<Position> _positionStream;
@@ -64,10 +64,10 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
       _targetCoordinates = Coordinates(p.latitude, p.longitude);
       _lastDistance = 0;
       _updatePosition(p);
-    });
 
-    // Suscribe to geolocation updates
-    _positionStream = Geolocator().getPositionStream(_locationOptions).listen(_updatePosition);
+      // Suscribe to geolocation updates
+      _positionStream = Geolocator().getPositionStream(_locationOptions).listen(_updatePosition);
+    });
 
 
     // TODO: add a setTimeout function to periodically check if user is still moving
