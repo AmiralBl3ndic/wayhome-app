@@ -28,7 +28,7 @@ class SettingsPage extends StatelessWidget {
             textAlign: TextAlign.left,
           ),
 
-          LocationInputForm(fieldContent: "8 rue Jean Macé, 75011 Paris", onSubmit: onAddressChange),
+          LocationInputForm(fieldContent: "", onSubmit: onAddressChange),
         ],
       )
     );
