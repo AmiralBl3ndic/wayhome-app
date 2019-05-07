@@ -23,24 +23,43 @@ class PagesManager extends StatefulWidget {
 
 class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver {
 
-  static int _motionTriggerTreshold = 2;  // Minimum 30 meters motion to trigger event
-
+  /// Minimum distance the user has to move before a position update is triggered by the `_positionStream`
+  static int _motionTriggerTreshold = 2;  // Minimum 20 meters motion to trigger event
+  /// Options for the stream that updates the user's geolocation (`_positionStream`)
   final LocationOptions _locationOptions = LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: _motionTriggerTreshold);
+  /// Stream that update the user's geolocation
   StreamSubscription<Position> _positionStream;
+  /// Last known position (shorthand to avoid too much asynchronous programming)
   Position _lastPosition;
+  /// Last known distance to target (shorthand to avoid too much asynchronous programming)
   double _lastDistance;
 
+  // Wrong direction properties
+  /// Counts the number of times in a row that the user went the wrong direction
+  int _wrongDirectionCounter = -1;
+  /// Number of times a user has to go the wrong direction before sending a notification
+  static int _wrongDirectionAlertMod = 6;
+  
+  // Target properties
+  /// Coordinates of the target
+  Coordinates _targetCoordinates;
+  /// Radius around the target (in meters) that can be considered as the target
+  int _geofenceRadius = 20;
+  /// Initial distance to the target
   double _initialDistance;
 
-  int _wrongDirectionCounter = -1;
-  static int _wrongDirectionAlertMod = 6;
-
-  
-  Coordinates _targetCoordinates;
+  // Motion checker properties
+  /// Timer to check if user moved during the set lapse of time
+  Timer _motionChecker;
+  /// Time before considering the user did not move and we should do something
+  Duration _userDidNotMoveThreshold = Duration(minutes: 5);
 
   // Page navigation properties
+  /// Index of the currently displayed page
   int _currentPageIndex = 1;  // Home page by default
+  /// Title for the pages to display
   List<String> _pagesTitles = ["wayHome - Settings", "wayHome", "wayHome - Map"];
+  /// List of pages (widgets) to be displayed
   List<Widget> _pages;
 
 
@@ -70,14 +89,32 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
     });
 
 
-    // TODO: add a setTimeout function to periodically check if user is still moving
+
+    _motionChecker = Timer.periodic(Duration(seconds: 20), (Timer timer) {
+      debugPrint("[Timer] Did a loop");
+      if (_lastPosition.timestamp.add(_userDidNotMoveThreshold).isBefore(DateTime.now())) {
+        if (_isAtTarget()) {
+          
+        } else {
+          // TODO: ask the user if everything's okay
+          // ? TODO: check number of times user has been asked
+          // TODO: determine threshold for number of times
+          // TODO: send SMS with geolocation (and address)
+
+          debugPrint("[ALERT] User hasn't moved for a while...");
+        }
+      }
+    }); 
   }
 
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _positionStream.cancel();
+    
+    _positionStream.cancel();  // Do not keep track of position when widget is destroyed
+    _motionChecker.cancel();  // Do not keep track of time since user moved for the last time
+
     super.dispose();
   }
 
@@ -105,7 +142,7 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
     Geolocator().distanceBetween(position.latitude, position.longitude, _targetCoordinates.latitude, _targetCoordinates.longitude)
       .then((double newDistance) {
         // We check if the user is going in the right direction
-        if (newDistance > _lastDistance) {  // TODO: determine an error margin (to avoid sending notifications straight away if user changes direction a bit)
+        if (newDistance > _lastDistance - 5) {  // TODO: determine an error margin (to avoid sending notifications straight away if user changes direction a bit)
           _wrongDirectionCounter++;  // Increment the wrong direction counter
 
           // If we reached a treshold of wrong direction (`_wrongDirectionAlertMod` times in a row), then send an alert
@@ -141,6 +178,14 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
 
         debugPrint("Updated target location : (lat=${newTarget.latitude}, long=${newTarget.longitude}, distance=$distance)");
       });
+  }
+
+
+  /// Check if user is at the set target
+  /// 
+  /// This method uses the `_geofenceRadius` to check whether or not the user is within the given radius of his target
+  bool _isAtTarget() {
+    return _lastDistance <= _geofenceRadius;
   }
 
 
