@@ -1,8 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_sms/flutter_sms.dart';
 
 import './contact_list.dart';
+import './contact_form.dart';
 
 import '../models/contact.dart';
 
@@ -37,8 +39,13 @@ class _ContactManagerState extends State<ContactManager> {
     return Expanded(
       child: Column(
         children: <Widget>[
-          Text("Champ d'ajout ici"),
-          ContactList(contacts: _contactList, deletionHandler: _confirmDelete)
+          ContactForm(onSubmit: _addContact,),
+
+          ContactList(contacts: _contactList, deletionHandler: _confirmDelete),
+          RaisedButton(child: Text("SMS"),
+          onPressed: (){
+            this._sendSMS("Je suis arrivé !", this._contactList);
+          },)
         ],
       )
     );
@@ -74,7 +81,7 @@ class _ContactManagerState extends State<ContactManager> {
   void _addContact(Contact contact) {
     setState(() {
       int sizeBefore = _contactList.length;
-      _contactList.add(contact);
+      _contactList.insert(0, contact);
 
       if(_contactList.length == sizeBefore + 1) {
         debugPrint("Added contact with id #${contact.id}");
@@ -84,7 +91,7 @@ class _ContactManagerState extends State<ContactManager> {
     });  
   }
 
-
+  ///Print a confirmation message dialog 
   Future<void> _confirmDelete(int contactId) async {
     return showDialog<void>(
       context: context,
@@ -118,6 +125,21 @@ class _ContactManagerState extends State<ContactManager> {
         );
       },
     );
+  }
+
+  void _sendSMS(String message, List<Contact> contacts) async {
+    List<String> recipients = new List<String>();
+
+    for (Contact c in contacts) {
+      recipients.add(c.name);
+    }
+
+  String _result = await FlutterSms
+          .sendSMS(message: message, recipients: recipients)
+          .catchError((onError) {
+        print(onError);
+      });
+    //print(_result);
   }
 
 }

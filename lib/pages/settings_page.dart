@@ -15,10 +15,8 @@ class SettingsPage extends StatelessWidget {
       children: <Widget>[
         ContactManager(
           initialContacts: List.from([
-            Contact(picture: null, name: "Stefania"),
-            Contact(picture: null, name: "Camille"),
-            Contact(picture: null, name: "Zoe"),
-            Contact(picture: null, name: "Jeremi"),
+            Contact(picture: null, name: "0662632169"),
+            Contact(picture: null, name: "0660845814"),
           ]),
         ),
       ],
