@@ -22,9 +22,9 @@ class PagesManager extends StatefulWidget {
 class _PagesManagerState extends State<PagesManager> {
 
   // Geolocalization properties
-  Position _position;
+  /*Position _position;
   LocationOptions _locOptions = LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 10);
-  Geolocator _locator = Geolocator();
+  Geolocator _locator = Geolocator();*/
 
   // Page navigation properties
   int _currentPageIndex = 1;  // Home page by default
@@ -40,11 +40,11 @@ class _PagesManagerState extends State<PagesManager> {
   void initState() {
     super.initState();
 
-    _position = null;  // Safety first
+    //_position = null;  // Safety first
 
-    _locator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then(_updatePosition);
+    /*_locator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then(_updatePosition);
 
-    _locator.getPositionStream(_locOptions).listen(_updatePosition);
+    _locator.getPositionStream(_locOptions).listen(_updatePosition); */
   }
 
 
@@ -89,19 +89,19 @@ class _PagesManagerState extends State<PagesManager> {
   void _updatePosition(Position p) {
     // Actually updates the position
     setState(() {
-      _position = p;
-      _pages[2] = MapPage(position: _position,);
+      //_position = p;
+      //_pages[2] = MapPage(position: _position,);
 
       debugPrint("Location updated");
     });
 
     // Debug print the address of the current position
-    _locator.placemarkFromCoordinates(p.latitude, p.longitude, localeIdentifier: "fr_FR").then((List<Placemark> placemarks) {
+    /* _locator.placemarkFromCoordinates(p.latitude, p.longitude, localeIdentifier: "fr_FR").then((List<Placemark> placemarks) {
       setState(() {
         Placemark pm = placemarks[0];
 
         debugPrint("Address: ${formatAddress(pm)}");
       });
-    });
+    }); */
   }
 }
