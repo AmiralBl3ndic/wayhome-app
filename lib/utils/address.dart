@@ -1,6 +1,15 @@
-import 'package:geolocator/geolocator.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:flutter/services.dart';
 
-/// Auto formats a Placemark to a readable address with the street number, the street name, the postal code and the locality
-String formatAddress(Placemark pm) {
-  return "${pm.name} ${pm.thoroughfare}, ${pm.postalCode} ${pm.locality}";
+
+/// Convert an address to a list of addresses
+Future<Coordinates> convertAddressToCoordinates(String address) async {
+  try {
+    List<Address> addresses = await Geocoder.local.findAddressesFromQuery(address);
+    return addresses.first.coordinates;
+  } on PlatformException {
+    throw("Unable to locate this address");
+  }
 }
+
+

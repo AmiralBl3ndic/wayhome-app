@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:geolocator/geolocator.dart';
-
 
 class MapPage extends StatelessWidget {
-  final Position position;
 
-  const MapPage({Key key, @required this.position}) : super(key: key);
+  final double latitude;
+  final double longitude;
+
+  MapPage({Key key, @required this.latitude, @required this.longitude}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,7 @@ class MapPage extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Center(
-            child: _buildLocationIndicator(),
+            child: (longitude == null || latitude == null) ? _buildLocationIndicator() : Text("Latitude = $latitude  |  Longitude = $longitude"),
           ),
         ],
       ),
@@ -25,17 +25,9 @@ class MapPage extends StatelessWidget {
 
 
   Column _buildLocationIndicator() {
-    if (position == null) {
-      return Column(
-        children: <Widget>[
-          CircularProgressIndicator(),
-        ],
-      );
-    }
-
     return Column(
       children: <Widget>[
-        Text("(latitude: ${position.latitude} ; longitude: ${position.longitude}"),
+        (latitude == null || longitude == null) ? CircularProgressIndicator() : Text("Latitude: $latitude, Longitude: $longitude"),
       ],
     );
   }

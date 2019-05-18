@@ -1,5 +1,5 @@
 name: way_home
-description: A new Flutter project.
+description: A bodyguard app that helps you get home safe
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -22,7 +22,11 @@ dependencies:
 
   cupertino_icons: ^0.1.2
 
-  geolocator: '^3.0.1'
+  location: ^2.3.5
+
+  geocoder: ^0.1.2
+
+  geolocator: ^4.0.0
   
   flutter_sms: '^1.0.0'
 

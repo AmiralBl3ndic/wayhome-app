@@ -142,5 +142,13 @@ class _ContactManagerState extends State<ContactManager> {
     //print(_result);
   }
 
+  bool _isContactListEmpty() {
+    if(_contactList.isEmpty) {
+      return true;
+    }else {
+      return false;
+    }
+  }
+
 }
 
