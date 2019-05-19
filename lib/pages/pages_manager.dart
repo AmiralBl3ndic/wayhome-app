@@ -21,7 +21,7 @@ class PagesManager extends StatefulWidget {
   _PagesManagerState createState() => _PagesManagerState();
 }
 
-class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver {
+class _PagesManagerState extends State<PagesManager> {
 
   /// Minimum distance the user has to move before a position update is triggered by the `_positionStream`
   static int _motionTriggerTreshold = 2;  // Minimum 20 meters motion to trigger event
