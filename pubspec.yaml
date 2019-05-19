@@ -28,6 +28,7 @@ dependencies:
 
   geolocator: ^4.0.0
   
+  flutter_sms: '^1.0.0'
 
 dev_dependencies:
   flutter_test:

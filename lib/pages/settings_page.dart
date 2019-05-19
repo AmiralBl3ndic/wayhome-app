@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../components/contact_manager.dart';
+
+import '../models/contact.dart';
 import 'package:geocoder/geocoder.dart';
 
 import '../components/location_input_form.dart';
@@ -29,6 +32,26 @@ class SettingsPage extends StatelessWidget {
           ),
 
           LocationInputForm(fieldContent: "", onSubmit: onAddressChange),
+
+          Container(
+            margin: EdgeInsets.only(top: 10),
+            child: Text(
+              "Contact List",
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold
+              ),
+              textAlign: TextAlign.left,
+            ),
+          ),
+
+
+          ContactManager(
+            initialContacts: List.from([
+              Contact(picture: null, name: "0662632169"),
+              Contact(picture: null, name: "0660845814"),
+            ]),
+          ),
         ],
       )
     );

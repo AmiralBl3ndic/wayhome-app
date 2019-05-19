@@ -11,6 +11,7 @@ import 'package:geocoder/geocoder.dart';
 import './home_page.dart';
 import './settings_page.dart';
 import './map_page.dart';
+import '../components/contact_manager.dart';
 
 
 class PagesManager extends StatefulWidget {
@@ -94,7 +95,9 @@ class _PagesManagerState extends State<PagesManager> {
       debugPrint("[Timer] Did a loop");
       if (_lastPosition.timestamp.add(_userDidNotMoveThreshold).isBefore(DateTime.now())) {
         if (_isAtTarget()) {
-          
+          //TODO-Camille: Vérifier si la contactList est vide ou non, et appeler l'un ou l'autre des MessageDialog en fonction
+          _targetReachedDialog();
+          _targetReachedDialogSMS();
         } else {
           // TODO: ask the user if everything's okay
           // ? TODO: check number of times user has been asked
@@ -147,7 +150,7 @@ class _PagesManagerState extends State<PagesManager> {
 
           // If we reached a treshold of wrong direction (`_wrongDirectionAlertMod` times in a row), then send an alert
           if (_wrongDirectionCounter % _wrongDirectionAlertMod == 0) {
-            // TODO: send push notification
+            _wrongDirectionDialog();
             debugPrint("Wrong direction $_wrongDirectionCounter time${_wrongDirectionCounter <= 1 ? "" : "s"} in a row");
           }
         } else {
@@ -204,6 +207,107 @@ class _PagesManagerState extends State<PagesManager> {
         setState(() {
           _currentPageIndex = tappedIndex;
         });
+      },
+    );
+  }
+
+  ///Print an alert message dialog when user is located next is home
+  Future<void> _targetReachedDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, 
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Alert'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('You have been located in the area of your home.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  ///Print an alert message dialog when user is located next is home and send an SMS to its contact list
+  Future<void> _targetReachedDialogSMS() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, 
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Alert'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('You have been located in the area of your home.'),
+                Text('Do you want to send an SMS to your contact list ?'),
+              ],
+            ),
+          ),
+         actions: <Widget>[
+            FlatButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                //TODO-Camille: Appeler ici fonction qui envoie un SMS (dans contact_manager.dart)
+              },
+            ),
+            FlatButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+   ///Print an alert message when the user is going the wrong way
+  Future<void> _wrongDirectionDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, 
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Alert'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('You are going in the WRONG direction.'),
+                Text('Are you sure you want to continue this way ?'),
+                Text('(Warning: it will close the app if you push YES)'),
+              ],
+            ),
+          ),
+         actions: <Widget>[
+            FlatButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+              },
+            ),
+            FlatButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
       },
     );
   }
