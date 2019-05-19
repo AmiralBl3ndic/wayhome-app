@@ -59,9 +59,13 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
   /// Index of the currently displayed page
   int _currentPageIndex = 1;  // Home page by default
   /// Title for the pages to display
-  List<String> _pagesTitles = ["wayHome - Settings", "wayHome", "wayHome - Map"];
+  List<String> _pagesTitles = ["Settings", "wayHome", "Trip"];
   /// List of pages (widgets) to be displayed
   List<Widget> _pages;
+
+
+  // Settings go here
+
 
 
   @override
@@ -198,7 +202,7 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(icon: Platform.isAndroid ? Icon(Icons.settings) : Icon(CupertinoIcons.settings), title: Text(_pagesTitles[0])),  // Settings page
         BottomNavigationBarItem(icon: Platform.isAndroid ? Icon(Icons.home) : Icon(CupertinoIcons.home), title: Text(_pagesTitles[1])),  // Home page (default)
-        BottomNavigationBarItem(icon: Platform.isAndroid ? Icon(Icons.map) : Icon(CupertinoIcons.location), title: Text(_pagesTitles[2]))  // Map page
+        BottomNavigationBarItem(icon: Platform.isAndroid ? Icon(Icons.location_on) : Icon(CupertinoIcons.location), title: Text(_pagesTitles[2]))  // Map page
       ],
 
       currentIndex: _currentPageIndex,
