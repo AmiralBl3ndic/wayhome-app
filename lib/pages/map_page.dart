@@ -36,7 +36,7 @@ class MapPage extends StatelessWidget {
           ),
           Container(
             margin: EdgeInsets.only(bottom: 10.0),
-            child: Text(targetAdress, style: TextStyle(fontSize: 15.0),),
+            child: Text(targetAdress == "" ? "No destination set" : targetAdress, style: TextStyle(fontSize: 15.0),),
           ),
 
 

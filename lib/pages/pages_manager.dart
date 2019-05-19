@@ -38,6 +38,9 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
   /// Translation into an address of the last known position
   String _lastKnownAddress = "";
 
+  /// Time of the last position update
+  DateTime _updatedAt;
+
   /// Address the user is going to
   String _targetAddress = "";
 
@@ -172,6 +175,10 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
           setState(() {
             _lastKnownAddress = "${address.subThoroughfare} ${address.thoroughfare}, ${address.postalCode} ${address.locality}, ${address.country}";
             debugPrint("Last known address = $_lastKnownAddress");
+
+            _updatedAt = position.timestamp;
+
+            debugPrint("_updatedAt = ${_updatedAt.toLocal()}");
 
             _lastPosition = position;
 
