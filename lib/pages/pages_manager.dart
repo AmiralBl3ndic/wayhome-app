@@ -34,6 +34,12 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
   Position _lastPosition;
   /// Last known distance to target (shorthand to avoid too much asynchronous programming)
   double _lastDistance;
+  
+  /// Translation into an address of the last known position
+  String _lastKnownAddress = "";
+
+  /// Address the user is going to
+  String _targetAddress = "";
 
   // Wrong direction properties
   /// Counts the number of times in a row that the user went the wrong direction
@@ -64,9 +70,6 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
   List<Widget> _pages;
 
 
-  // Settings go here
-
-
 
   @override
   void initState() {
@@ -80,7 +83,7 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
     _pages = [
       SettingsPage(onAddressChange: _onTargetChange,),
       HomePage(),
-      MapPage(latitude: null, longitude: null,),
+      MapPage(latitude: null, longitude: null, lastKnownAddress: _lastKnownAddress, lastDistance: _lastDistance, targetAdress: _targetAddress,),
     ];
 
 
@@ -160,15 +163,22 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
         } else {
           _wrongDirectionCounter = -1;  // Reinit the counter
         }
+
+        _lastDistance = newDistance;
+
+        Geolocator().placemarkFromPosition(position).then((List<Placemark> lp) {
+          Placemark address = lp.first;
+
+          setState(() {
+            _lastKnownAddress = "${address.subThoroughfare} ${address.thoroughfare}, ${address.postalCode} ${address.locality}, ${address.country}";
+            debugPrint("Last known address = $_lastKnownAddress");
+
+            _lastPosition = position;
+
+            _pages[2] = MapPage(latitude: position.latitude, longitude: position.longitude, lastKnownAddress: _lastKnownAddress, lastDistance: _lastDistance, targetAdress: _targetAddress,);  // Maybe not necessary
+          });
+        });
       });
-
-    // Update the last known position
-    setState(() {  // TODO: check if setState is really needed here (avoid rebuilding entire pages when not necessary)
-      _lastPosition = position;
-      debugPrint("Updated position: (lat=${position.latitude}, long=${position.longitude})");
-
-      _pages[2] = MapPage(latitude: position.latitude, longitude: position.longitude,);  // Maybe not necessary
-    });
   }
 
 
@@ -177,13 +187,21 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
     // Compute distance to target before setting the new target
     Geolocator().distanceBetween(_lastPosition.latitude, _lastPosition.longitude, newTarget.latitude, newTarget.longitude)
       .then((double distance) {
-        setState(() {
+
+        Geolocator().placemarkFromCoordinates(newTarget.latitude, newTarget.longitude).then((List<Placemark> lp) {
+          Placemark address = lp.first;
+
+          setState(() {
           _initialDistance = distance;
           _lastDistance = distance;
           _targetCoordinates = newTarget;
+          _targetAddress = "${address.subThoroughfare} ${address.thoroughfare}, ${address.postalCode} ${address.locality}, ${address.country}";
+
+          _pages[2] = MapPage(latitude: null, longitude: null, lastKnownAddress: _lastKnownAddress, lastDistance: _lastDistance, targetAdress: _targetAddress,); 
         });
 
-        debugPrint("Updated target location : (lat=${newTarget.latitude}, long=${newTarget.longitude}, distance=$distance)");
+        debugPrint("Updated target location : \"$_targetAddress\" (lat=${newTarget.latitude}, long=${newTarget.longitude}, distance=$distance)");
+        });
       });
   }
 

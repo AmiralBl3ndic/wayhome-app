@@ -6,17 +6,63 @@ class MapPage extends StatelessWidget {
   final double latitude;
   final double longitude;
 
-  MapPage({Key key, @required this.latitude, @required this.longitude}) : super(key: key);
+  final String lastKnownAddress;
+
+  final double lastDistance;
+
+  final String targetAdress;
+
+  MapPage({Key key, @required this.latitude, @required this.longitude, @required this.lastKnownAddress, @required this.lastDistance, @required this.targetAdress}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 10.0),
+      margin: EdgeInsets.all(30.0),
 
-      child: Column(
+      child: ListView(
+        shrinkWrap: true,
         children: <Widget>[
-          Center(
-            child: (longitude == null || latitude == null) ? _buildLocationIndicator() : Text("Latitude = $latitude  |  Longitude = $longitude"),
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 35.0),
+            child: Center(
+              child: Text("Your trip", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.bold)),
+            ),
+          ),
+
+
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 15.0),
+            child: Text("Currently going to:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),),
+          ),
+          Container(
+            margin: EdgeInsets.only(bottom: 10.0),
+            child: Text(targetAdress, style: TextStyle(fontSize: 15.0),),
+          ),
+
+
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 15.0),
+            child: Text("Last known address:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),),
+          ),
+          Container(
+            margin: EdgeInsets.only(bottom: 10.0),
+            child: Text(lastKnownAddress, style: TextStyle(fontSize: 15.0),),
+          ),
+
+
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 15.0),
+            child: Text("Distance to objective:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),),
+          ),
+          Container(
+            margin: EdgeInsets.only(bottom: 10.0),
+            child: Text("${lastDistance.toStringAsFixed(2)} meter${lastDistance <= 1 ? '' : 's'}", style: TextStyle(fontSize: 15.0),),
+          ),
+
+
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 15.0),
+            child: Text("Last update at:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),),
           ),
         ],
       ),
