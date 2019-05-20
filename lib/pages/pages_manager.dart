@@ -72,6 +72,15 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
   /// List of pages (widgets) to be displayed
   List<Widget> _pages;
 
+  /// Whether or not the target reached dialog is currently displayed
+  bool _targetReachedDialogShown = false;
+
+  /// Whether or not the target reached SMS dialog is currently displayed
+  bool _targetReachedDialogSMSShown = false;
+
+  /// Whether or not the wrong direction dialog is currently displayed
+  bool _wrongDirectionDialogShown = false;
+
 
 
   @override
@@ -106,6 +115,8 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
       if (_lastPosition.timestamp.add(_userDidNotMoveThreshold).isBefore(DateTime.now())) {
         if (_isAtTarget()) {
           //TODO-Camille: Vérifier si la contactList est vide ou non, et appeler l'un ou l'autre des MessageDialog en fonction
+          
+
           _targetReachedDialog();
           _targetReachedDialogSMS();
         } else {
@@ -242,102 +253,122 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
 
   ///Print an alert message dialog when user is located next is home
   Future<void> _targetReachedDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, 
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Alert'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('You have been located in the area of your home.'),
-              ],
+    if (!_targetReachedDialogShown) {
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: false, 
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Alert'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text('You have been located in the area of your home.'),
+                ],
+              ),
             ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+            actions: <Widget>[
+              FlatButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      return Future<void>(() {
+        debugPrint("Unable to display target reached dialog because it is already being displayed");
+      });
+    }
   }
 
   ///Print an alert message dialog when user is located next is home and send an SMS to its contact list
   Future<void> _targetReachedDialogSMS() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, 
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Alert'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('You have been located in the area of your home.'),
-                Text('Do you want to send an SMS to your contact list ?'),
-              ],
+    if (!_targetReachedDialogSMSShown) {
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: false, 
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Alert'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text('You have been located in the area of your home.'),
+                  Text('Do you want to send an SMS to your contact list ?'),
+                ],
+              ),
             ),
-          ),
-         actions: <Widget>[
-            FlatButton(
-              child: Text('Yes'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                //TODO-Camille: Appeler ici fonction qui envoie un SMS (dans contact_manager.dart)
-              },
-            ),
-            FlatButton(
-              child: Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+          actions: <Widget>[
+              FlatButton(
+                child: Text('Yes'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  //TODO-Camille: Appeler ici fonction qui envoie un SMS (dans contact_manager.dart)
+                },
+              ),
+              FlatButton(
+                child: Text('No'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      return Future<void>(() {
+        debugPrint("Unable to display target reached SMS dialog because it is already being displayed");
+      });
+    }
   }
 
    ///Print an alert message when the user is going the wrong way
   Future<void> _wrongDirectionDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, 
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Alert'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('You are going in the WRONG direction.'),
-                Text('Are you sure you want to continue this way ?'),
-                Text('(Warning: it will close the app if you push YES)'),
-              ],
+    if (!_wrongDirectionDialogShown) {
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: false, 
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Alert'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text('You are going in the WRONG direction.'),
+                  Text('Are you sure you want to continue this way ?'),
+                  Text('(Warning: it will close the app if you push YES)'),
+                ],
+              ),
             ),
-          ),
-         actions: <Widget>[
-            FlatButton(
-              child: Text('Yes'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-              },
-            ),
-            FlatButton(
-              child: Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+          actions: <Widget>[
+              FlatButton(
+                child: Text('Yes'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+                  _wrongDirectionDialogShown = false;
+                },
+              ),
+              FlatButton(
+                child: Text('No'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _wrongDirectionDialogShown = false;
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      return Future<void>(() {
+        debugPrint("Unable to display the wrong direction dialog because it is already being displayed");
+      });
+    }
   }
 }

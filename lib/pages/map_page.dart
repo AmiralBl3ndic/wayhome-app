@@ -58,12 +58,6 @@ class MapPage extends StatelessWidget {
             margin: EdgeInsets.only(bottom: 10.0),
             child: Text("${lastDistance.toStringAsFixed(2)} meter${lastDistance <= 1 ? '' : 's'}", style: TextStyle(fontSize: 15.0),),
           ),
-
-
-          Container(
-            margin: EdgeInsets.symmetric(vertical: 15.0),
-            child: Text("Last update at:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),),
-          ),
         ],
       ),
     );

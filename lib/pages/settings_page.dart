@@ -48,8 +48,8 @@ class SettingsPage extends StatelessWidget {
 
           ContactManager(
             initialContacts: List.from([
-              Contact(picture: null, name: "0662632169"),
-              Contact(picture: null, name: "0660845814"),
+              Contact(picture: null, name: "0612345678"),
+              Contact(picture: null, name: "0687654321"),
             ]),
           ),
         ],
