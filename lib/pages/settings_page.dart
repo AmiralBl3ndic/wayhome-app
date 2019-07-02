@@ -15,7 +15,11 @@ class SettingsPage extends StatelessWidget {
   final Function(Coordinates) onAddressChange;
 
   /// Default constructor for the SettingsPage widget
-  const SettingsPage({Key key, @required this.onAddressChange}) : super(key: key);
+  const SettingsPage({Key key, @required this.onAddressChange, @required this.contactManager}) : super(key: key);
+
+  /// Contact manager to use
+  final ContactManager contactManager;
+
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +49,7 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
 
-
-          ContactManager(
-            initialContacts: List.from([
-              Contact(picture: null, name: "0612345678"),
-              Contact(picture: null, name: "0687654321"),
-            ]),
-          ),
+          contactManager,
         ],
       )
     );

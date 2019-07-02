@@ -4,10 +4,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_sms/flutter_sms.dart';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoder/geocoder.dart';
 
+import '../models/contact.dart';
 import './home_page.dart';
 import './settings_page.dart';
 import './map_page.dart';
@@ -82,18 +84,39 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
   bool _wrongDirectionDialogShown = false;
 
 
+  List<Contact> _contactList = List();
+
+
+  bool _widgetCreated = false;
+
+
 
   @override
   void initState() {
     super.initState();
+
+    _widgetCreated = false;
 
     // Force device to use application in Portrait orientation only
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
     WidgetsBinding.instance.addObserver(this);
 
+    // ! TODO: Remove the following initialization when on production
+    // Initialization of the contact list (for demo only)
+    _contactList = List.from([
+      Contact(picture: null, name: "0612345678"),
+      Contact(picture: null, name: "0687654321"),
+    ]);
+
     _pages = [
-      SettingsPage(onAddressChange: _onTargetChange,),
+      SettingsPage(
+        onAddressChange: _onTargetChange,
+        contactManager: ContactManager(
+          initialContacts: _contactList,
+          onListChange: _updateContactList,
+        ),
+      ),
       HomePage(),
       MapPage(latitude: null, longitude: null, lastKnownAddress: _lastKnownAddress, lastDistance: _lastDistance, targetAdress: _targetAddress,),
     ];
@@ -108,27 +131,29 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
       _positionStream = Geolocator().getPositionStream(_locationOptions).listen(_updatePosition);
     });
 
-
-
     _motionChecker = Timer.periodic(Duration(seconds: 20), (Timer timer) {
-      debugPrint("[Timer] Did a loop");
-      if (_lastPosition.timestamp.add(_userDidNotMoveThreshold).isBefore(DateTime.now())) {
-        if (_isAtTarget()) {
-          //TODO-Camille: Vérifier si la contactList est vide ou non, et appeler l'un ou l'autre des MessageDialog en fonction
-          
+      if (_widgetCreated) {
+        debugPrint("[Timer] Did a loop");
+        if (_lastPosition.timestamp.add(_userDidNotMoveThreshold).isBefore(DateTime.now())) {
+          if (_isAtTarget()) {
+            if (_contactList.isEmpty) {
+              _targetReachedDialog();
+            } else {
+              _targetReachedDialogSMS();
+            }
+          } else {
+            // TODO: ask the user if everything's okay
+            // ? TODO: check number of times user has been asked
+            // TODO: determine threshold for number of times
+            // TODO: send SMS with geolocation (and address)
 
-          _targetReachedDialog();
-          _targetReachedDialogSMS();
-        } else {
-          // TODO: ask the user if everything's okay
-          // ? TODO: check number of times user has been asked
-          // TODO: determine threshold for number of times
-          // TODO: send SMS with geolocation (and address)
-
-          debugPrint("[ALERT] User hasn't moved for a while...");
+            debugPrint("[ALERT] User hasn't moved for a while...");
+          }
         }
       }
-    }); 
+    });
+
+    _widgetCreated = true;
   }
 
 
@@ -145,6 +170,8 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
+    _targetReachedDialogSMS();
+
     return Container(
        child: Scaffold(
          appBar: AppBar(
@@ -166,7 +193,7 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
     Geolocator().distanceBetween(position.latitude, position.longitude, _targetCoordinates.latitude, _targetCoordinates.longitude)
       .then((double newDistance) {
         // We check if the user is going in the right direction
-        if (newDistance > _lastDistance - 5) {  // TODO: determine an error margin (to avoid sending notifications straight away if user changes direction a bit)
+        if (newDistance > _lastDistance - 5) {
           _wrongDirectionCounter++;  // Increment the wrong direction counter
 
           // If we reached a treshold of wrong direction (`_wrongDirectionAlertMod` times in a row), then send an alert
@@ -231,7 +258,6 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
     return _lastDistance <= _geofenceRadius;
   }
 
-
   /// Builds the BottomNavigationBar widget (into a function for better code readability)
   BottomNavigationBar _buildNavigationBar() {
     return BottomNavigationBar(
@@ -258,6 +284,7 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
         context: context,
         barrierDismissible: false, 
         builder: (BuildContext context) {
+          _targetReachedDialogShown = true;
           return AlertDialog(
             title: Text('Alert'),
             content: SingleChildScrollView(
@@ -292,6 +319,8 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
         context: context,
         barrierDismissible: false, 
         builder: (BuildContext context) {
+          _targetReachedDialogSMSShown = true;
+
           return AlertDialog(
             title: Text('Alert'),
             content: SingleChildScrollView(
@@ -307,7 +336,7 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
                 child: Text('Yes'),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  //TODO-Camille: Appeler ici fonction qui envoie un SMS (dans contact_manager.dart)
+                  _sendSMS("Je suis bien arrivé•e !", _contactList);
                 },
               ),
               FlatButton(
@@ -334,6 +363,7 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
         context: context,
         barrierDismissible: false, 
         builder: (BuildContext context) {
+          _wrongDirectionDialogShown = true;
           return AlertDialog(
             title: Text('Alert'),
             content: SingleChildScrollView(
@@ -370,5 +400,27 @@ class _PagesManagerState extends State<PagesManager> with WidgetsBindingObserver
         debugPrint("Unable to display the wrong direction dialog because it is already being displayed");
       });
     }
+  }
+
+  /// Updates the contact list
+  void _updateContactList(List<Contact> newContactList) {
+    setState(() {
+      _contactList = newContactList;
+    });
+  }
+
+  /// Send a SMS to all the contacts in the contact list
+  void _sendSMS(String message, List<Contact> contacts) async {
+    List<String> recipients = new List<String>();
+
+    for (Contact c in contacts) {
+      recipients.add(c.name);
+    }
+
+    String _result = await FlutterSms
+          .sendSMS(message: message, recipients: recipients)
+          .catchError((onError) {
+        print(onError);
+      });
   }
 }

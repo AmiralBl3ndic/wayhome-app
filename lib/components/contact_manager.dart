@@ -11,7 +11,9 @@ import '../models/contact.dart';
 class ContactManager extends StatefulWidget {
   final List<Contact> initialContacts;
 
-  ContactManager({Key key, this.initialContacts}) : super(key: key);
+  ContactManager({Key key, this.initialContacts, @required this.onListChange}) : super(key: key);
+
+  final Function(List<Contact>) onListChange;
 
   @override
   State<StatefulWidget> createState() => _ContactManagerState(); 
@@ -44,7 +46,7 @@ class _ContactManagerState extends State<ContactManager> {
           ContactList(contacts: _contactList, deletionHandler: _confirmDelete),
           RaisedButton(child: Text("SMS"),
           onPressed: (){
-            this._sendSMS("Je suis arrivé !", this._contactList);
+            this._sendSMS("Je suis bien arrivé•e !", this._contactList);
           },)
         ],
       )
@@ -63,8 +65,9 @@ class _ContactManagerState extends State<ContactManager> {
       } else {
         debugPrint("[ERROR] Could not find contact with id #$contactId");
       }
-
     });
+
+    widget.onListChange(_contactList);
   }
 
 
@@ -75,6 +78,8 @@ class _ContactManagerState extends State<ContactManager> {
 
       debugPrint("Thanos snapped");
     });
+
+    widget.onListChange(_contactList);
   }
 
   /// Add a contact to the local contact list and updates the widget
@@ -88,7 +93,9 @@ class _ContactManagerState extends State<ContactManager> {
       } else {
         debugPrint("[ERROR] Could not add contact");
       }
-    });  
+    });
+
+    widget.onListChange(_contactList);
   }
 
   ///Print a confirmation message dialog 
@@ -134,21 +141,11 @@ class _ContactManagerState extends State<ContactManager> {
       recipients.add(c.name);
     }
 
-  String _result = await FlutterSms
+    String _result = await FlutterSms
           .sendSMS(message: message, recipients: recipients)
           .catchError((onError) {
         print(onError);
       });
-    //print(_result);
   }
-
-  bool _isContactListEmpty() {
-    if(_contactList.isEmpty) {
-      return true;
-    }else {
-      return false;
-    }
-  }
-
 }
 
